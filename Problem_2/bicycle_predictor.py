@@ -2,10 +2,15 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 
-TRAIN_EPOCHS = 100  # The number of times the complete dataset is used to during training
+TRAIN_EPOCHS = 300  # The number of times the complete dataset is used to during training
 BATCH_SIZE = 64  # Number of examples to use for calculating the gradient
 LEARNING_RATE = 1e-3  # Scales the size of the parameter updates
-L2_WEIGHT_LOSS = 0e-3  # Penalty on the size of the parameters, used for regularization
+L2_WEIGHT_LOSS = 1e-3  # Penalty on the size of the parameters, used for regularization
+
+"""TRAIN_EPOCHS = 300  # The number of times the complete dataset is used to during training
+BATCH_SIZE = 64  # Number of examples to use for calculating the gradient
+LEARNING_RATE = 1e-3  # Scales the size of the parameter updates
+L2_WEIGHT_LOSS = 1e-3  # Penalty on the size of the parameters, used for regularization"""
 
 REPORT_INTERVAL = 10  # Report the learning progress once every number of epochs
 
@@ -72,7 +77,7 @@ def create_loss_and_train_ops(targets, network_prediction):
             l2_weight_loss = tf.add_n([tf.nn.l2_loss(v) for v in tf.trainable_variables()
                                        if 'bias' not in v.name]) * L2_WEIGHT_LOSS
 
-        total_loss = mean_absolute_error + l2_weight_loss
+        total_loss = mean_squared_error + l2_weight_loss
 
         optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE,
                                            beta1=0.9,
@@ -84,16 +89,35 @@ def create_loss_and_train_ops(targets, network_prediction):
 def create_neural_network(network_input):
     """Create the neural network used to predict the number of rented out bicycles"""
 
-    blanked_out_input = network_input * tf.constant([[0.0]])
+    blanked_out_input = network_input #* tf.constant([[0.0]])
 
+    """hidden_layer1 = fully_connected_network_layer(name='hidden1',
+                                              input_tensor=blanked_out_input,
+                                              size=100,
+                                              activation_function='linear')"""
+    #Exercise 2.3
     hidden_layer1 = fully_connected_network_layer(name='hidden1',
                                                   input_tensor=blanked_out_input,
                                                   size=100,
-                                                  activation_function='linear')
-    prediction = fully_connected_network_layer(name='output',
+                                                  activation_function='relu')
+    """prediction = fully_connected_network_layer(name='output',
                                                input_tensor=hidden_layer1,
                                                size=TARGET_SIZE,
-                                               activation_function='linear')
+                                               activation_function='linear')"""
+    # Exercise 2.4
+    hidden_layer2 = fully_connected_network_layer(name='hidden2',
+                                                  input_tensor=hidden_layer1,
+                                                  size=100,
+                                                  activation_function='relu')
+    """prediction = fully_connected_network_layer(name='output',
+                                               input_tensor=hidden_layer2,
+                                               size=TARGET_SIZE,
+                                               activation_function='linear')"""
+    # Exercise 2.4 b)
+    prediction = fully_connected_network_layer(name='output',
+                                               input_tensor=hidden_layer2,
+                                               size=TARGET_SIZE,
+                                               activation_function='relu')
     return prediction
 
 
@@ -316,8 +340,8 @@ if __name__ == '__main__':
 
         """ (4) Train and get results by running ops"""
         model.train()  # Train the network to predict the bicycle rentals
-
-        # model.largest_data_point_errors() # print the dates and times on which the model makes
+        """Bonus exercise
+        model.largest_data_point_errors() # print the dates and times on which the model makes"""
         # the largest errors.
 
     plt.ioff()
